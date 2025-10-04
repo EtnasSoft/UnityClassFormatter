@@ -1,0 +1,7 @@
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\ClassFormatter.exe
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\ClassFormatter.dll
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\ClassFormatter.deps.json
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\ClassFormatter.runtimeconfig.json
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\ClassFormatter.pdb
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\Microsoft.CodeAnalysis.dll
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\Publish\Microsoft.CodeAnalysis.CSharp.dll

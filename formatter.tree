@@ -1,0 +1,22 @@
+.
+└── ClassFormatter
+    ├── bin
+    │   └── Publish
+    │       ├── ClassFormatter.deps.json
+    │       ├── ClassFormatter.dll
+    │       ├── ClassFormatter.exe
+    │       ├── ClassFormatter.pdb
+    │       ├── ClassFormatter.runtimeconfig.json
+    │       ├── Microsoft.CodeAnalysis.CSharp.dll
+    │       └── Microsoft.CodeAnalysis.dll
+    ├── ClassFormatter.csproj
+    ├── obj
+    │   ├── ClassFormatter.csproj.nuget.dgspec.json
+    │   ├── ClassFormatter.csproj.nuget.g.props
+    │   ├── ClassFormatter.csproj.nuget.g.targets
+    │   ├── project.assets.json
+    │   ├── project.nuget.cache
+    │   └── Release
+    ├── Program.cs.old
+    └── README
+

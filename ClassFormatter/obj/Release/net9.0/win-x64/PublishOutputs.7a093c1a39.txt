@@ -1,0 +1,2 @@
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\publish\ClassFormatter.pdb
+C:\Users\etnas\OneDrive\www\Unity\ThisLandIsMine\Formatter\ClassFormatter\bin\publish\ClassFormatter.exe
