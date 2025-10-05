@@ -1,9 +1,5 @@
 # .NET
-bin/
 obj/
-*.exe
-*.dll
-*.pdb
 *.user
 *.aps
 *.pch
@@ -54,9 +50,8 @@ project.lock.json
 project.fragment.lock.json
 artifacts/
 
-# Publish
-publish/
-*.publishproj
+# Debug
+Debug/
 
 # Testing
 TestResults/
