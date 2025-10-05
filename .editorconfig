@@ -1,0 +1,84 @@
+root = true
+
+[*]
+charset = utf-8
+end_of_line = crlf
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_style = space
+indent_size = 4
+tab_width = 4
+
+# C# coding style
+csharp_style_var_for_built_in_types = true:suggestion
+csharp_style_var_when_type_is_apparent = true:suggestion
+csharp_style_var_elsewhere = true:suggestion
+
+dotnet_style_qualification_for_field = false:suggestion
+dotnet_style_qualification_for_property = false:suggestion
+dotnet_style_qualification_for_method = false:suggestion
+dotnet_style_qualification_for_event = false:suggestion
+
+dotnet_style_predefined_type_for_locals_parameters_members = true:suggestion
+dotnet_style_predefined_type_for_member_access = true:suggestion
+
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:suggestion
+dotnet_style_readonly_field = true:suggestion
+
+dotnet_style_object_initializer = true:suggestion
+dotnet_style_collection_initializer = true:suggestion
+dotnet_style_explicit_tuple_names = true:suggestion
+dotnet_style_null_propagation = true:suggestion
+dotnet_style_coalesce_expression = true:suggestion
+
+dotnet_style_prefer_inferred_tuple_names = true:suggestion
+dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
+dotnet_style_prefer_auto_properties = true:suggestion
+dotnet_style_prefer_conditional_expression_over_assignment = true:suggestion
+dotnet_style_prefer_conditional_expression_over_return = true:suggestion
+
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:suggestion
+
+csharp_style_expression_bodied_methods = false:none
+csharp_style_expression_bodied_constructors = false:none
+csharp_style_expression_bodied_operators = false:none
+csharp_style_expression_bodied_properties = true:none
+csharp_style_expression_bodied_indexers = true:none
+csharp_style_expression_bodied_accessors = true:none
+
+csharp_style_inlined_variable_declaration = true:suggestion
+
+dotnet_sort_system_directives_first = true
+dotnet_separate_import_directive_groups = false
+
+# Naming conventions
+dotnet_naming_style.pascal_case_style.capitalization = pascal_case
+dotnet_naming_style.camel_case_style.capitalization = camel_case
+
+dotnet_naming_rule.class_rule.severity = suggestion
+dotnet_naming_rule.class_rule.symbols = class_symbols
+dotnet_naming_rule.class_rule.style = pascal_case_style
+
+dotnet_naming_rule.interface_rule.severity = suggestion
+dotnet_naming_rule.interface_rule.symbols = interface_symbols
+dotnet_naming_rule.interface_rule.style = pascal_case_style
+
+dotnet_naming_rule.method_rule.severity = suggestion
+dotnet_naming_rule.method_rule.symbols = method_symbols
+dotnet_naming_rule.method_rule.style = pascal_case_style
+
+dotnet_naming_rule.property_rule.severity = suggestion
+dotnet_naming_rule.property_rule.symbols = property_symbols
+dotnet_naming_rule.property_rule.style = pascal_case_style
+
+dotnet_naming_rule.field_rule.severity = suggestion
+dotnet_naming_rule.field_rule.symbols = field_symbols
+dotnet_naming_rule.field_rule.style = camel_case_style
+
+dotnet_naming_symbols.class_symbols.applicable_kinds = class
+dotnet_naming_symbols.interface_symbols.applicable_kinds = interface
+dotnet_naming_symbols.method_symbols.applicable_kinds = method
+dotnet_naming_symbols.property_symbols.applicable_kinds = property
+dotnet_naming_symbols.field_symbols.applicable_kinds = field

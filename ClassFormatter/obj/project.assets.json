@@ -1055,11 +1055,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\ThisLandIsMine\\Formatter\\ClassFormatter\\ClassFormatter.csproj",
+      "projectUniqueName": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\Formatter\\ClassFormatter\\ClassFormatter.csproj",
       "projectName": "ClassFormatter",
-      "projectPath": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\ThisLandIsMine\\Formatter\\ClassFormatter\\ClassFormatter.csproj",
+      "projectPath": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\Formatter\\ClassFormatter\\ClassFormatter.csproj",
       "packagesPath": "C:\\Users\\etnas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\ThisLandIsMine\\Formatter\\ClassFormatter\\obj\\",
+      "outputPath": "C:\\Users\\etnas\\OneDrive\\www\\Unity\\Formatter\\ClassFormatter\\obj\\",
       "projectStyle": "PackageReference",
       "configFilePaths": [
         "C:\\Users\\etnas\\AppData\\Roaming\\NuGet\\NuGet.Config"
