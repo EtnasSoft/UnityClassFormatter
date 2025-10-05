@@ -54,6 +54,24 @@ VSCode or other tools can reference the executable directly from:
 
 No files from the submodule are included in the Unity build.
 
+## Installing in Your Unity Project
+
+To integrate UnityClassFormatter into your own Unity project as a Git submodule, follow these steps:
+
+1. Open a terminal in your Unity project's root directory.
+2. Add the submodule under the `Tools/` folder:
+   ```
+   git submodule add https://github.com/EtnasSoft/UnityClassFormatter.git Tools/UnityClassFormatter
+   ```
+3. Initialize and update the submodule:
+   ```
+   git submodule update --init --recursive
+   ```
+4. The formatter executable will be available at `Tools/UnityClassFormatter/bin/publish/UnityClassFormatter.exe`.
+5. Configure your code editor (e.g., VSCode) to use this executable for automatic formatting of `.cs` files. See the "Usage in VSCode" section below for an example configuration.
+
+This setup ensures the formatter is versioned and reusable across your projects without duplicating binaries.
+
 ## Sorting Rules
 
 ### 1. Section Order
