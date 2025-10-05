@@ -135,6 +135,8 @@ namespace ClassFormatter
             var fields = serializedFields.Concat(nonSerializedFields).ToList();
             // Move [Header] attributes to the first member in each group
             fields = MoveHeadersToFirst(fields);
+            // Add line break after the last [SerializeField] of each group
+            fields = AddLineBreakAfterLastSerializedFieldInGroups(fields);
             constructors = constructors.OrderBy(x => x.AccessOrder).ThenBy(x => x.Name).ToList();
             properties = SortMembers(properties);
             eventsDelegates = SortMembers(eventsDelegates);
@@ -282,6 +284,56 @@ namespace ClassFormatter
                 }
                 result.AddRange(groupMembers);
             }
+            return result;
+        }
+
+        private static List<MemberInfo> AddLineBreakAfterLastSerializedFieldInGroups(List<MemberInfo> members)
+        {
+            // Group by GroupOrder to identify groups
+            var grouped = members.GroupBy(x => x.GroupOrder).OrderBy(g => g.Key);
+            var result = new List<MemberInfo>();
+
+            foreach (var group in grouped)
+            {
+                var groupMembers = group.ToList();
+
+                // Find the last [SerializeField] in this group
+                MemberInfo? lastSerializedField = null;
+                int lastSerializedFieldIndex = -1;
+
+                for (int i = groupMembers.Count - 1; i >= 0; i--)
+                {
+                    if (groupMembers[i].Node is FieldDeclarationSyntax fd &&
+                        fd.AttributeLists.Any(al => al.Attributes.Any(a => a.Name.ToString() == "SerializeField")))
+                    {
+                        lastSerializedField = groupMembers[i];
+                        lastSerializedFieldIndex = i;
+                        break;
+                    }
+                }
+
+                // If there's a last [SerializeField] and it's not the last member in the group
+                if (lastSerializedField != null && lastSerializedFieldIndex < groupMembers.Count - 1)
+                {
+                    // Check if it already has a blank line after it
+                    var node = lastSerializedField.Node;
+                    var trailingTrivia = node.GetTrailingTrivia();
+
+                    // Count newlines in trailing trivia
+                    int newlineCount = trailingTrivia.Count(t => t.IsKind(SyntaxKind.EndOfLineTrivia));
+
+                    // If it doesn't have at least 2 newlines (one for the line end, one for blank line), add one
+                    if (newlineCount < 2)
+                    {
+                        var extraNewline = SyntaxFactory.CarriageReturnLineFeed;
+                        var newTrailingTrivia = trailingTrivia.Add(extraNewline);
+                        lastSerializedField.Node = node.WithTrailingTrivia(newTrailingTrivia);
+                    }
+                }
+
+                result.AddRange(groupMembers);
+            }
+
             return result;
         }
 
