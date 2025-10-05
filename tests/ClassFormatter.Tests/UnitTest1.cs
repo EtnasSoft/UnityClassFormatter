@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace ClassFormatter.Tests;
 
 public class UnitTest1

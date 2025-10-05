@@ -20,7 +20,7 @@
   </Target>
 
   <Target Name="CleanReleaseFolder" AfterTargets="Publish">
-    <RemoveDir Directories="$(ProjectDir)bin\Release" />
+    <RemoveDir Directories="$(ProjectDir)bin" />
     <Message Text="Carpeta Release eliminada" Importance="high" />
   </Target>
 

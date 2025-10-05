@@ -144,7 +144,7 @@ Formatter/ClassFormatter/ClassFormatter.cs
 1. Open a terminal in the project folder (where the `.csproj` is)
 2. Run:
    ```bash
-   dotnet publish -c Release -o bin/publish
+   dotnet publish src/ClassFormatter/ClassFormatter.csproj --configuration Release --output bin/publish
    ```
 3. This generates the updated files:
    - `bin/publish/ClassFormatter.exe`
@@ -232,3 +232,4 @@ For changes in formatting rules, edit the file `ClassFormatter.cs` and adjust th
 - `VisitClassDeclaration()`: Define the categories
 - `SortMembers()`: Define the sorting order
 - `GetAccessOrder()`: Define the access level priority
+

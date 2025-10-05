@@ -4,6 +4,9 @@ VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassFormatter", "src\ClassFormatter\ClassFormatter.csproj", "{86964CC2-21FD-6653-E622-EE39CA7CD274}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClassFormatter.Tests", "tests\ClassFormatter.Tests\ClassFormatter.Tests.csproj", "{86964CC2-21FD-6653-E622-EE39CA7CD274}"
+EndProject
+
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
