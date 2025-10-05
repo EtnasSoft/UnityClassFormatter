@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\ClassFormatter\ClassFormatter.csproj" />
+    <ProjectReference Include="..\..\src\UnityClassFormatter\UnityClassFormatter.csproj" />
   </ItemGroup>
 
 </Project>

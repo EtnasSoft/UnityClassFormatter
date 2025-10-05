@@ -1,12 +1,12 @@
-# ClassFormatter for Unity
+# UnityClassFormatter for Unity
 
 Automatic C# code formatter that reorganizes class members following style conventions for Unity projects.
 
 ## What does it do?
 
-ClassFormatter automatically reorders the members of your C# classes in Unity, grouping them by type and access level, while **preserving `[Header]` groupings** to not disperse related properties in the Inspector.
+UnityClassFormatter automatically reorders the members of your C# classes in Unity, grouping them by type and access level, while **preserving `[Header]` groupings** to not disperse related properties in the Inspector.
 
-# ClassFormatter (Git Submodule)
+# UnityClassFormatter (Git Submodule)
 
 This repository is included as a **Git submodule** rather than being copied into the project.
 The goal is to avoid duplicating this external tool across multiple Unity projects while keeping it available locally.
@@ -21,7 +21,7 @@ The goal is to avoid duplicating this external tool across multiple Unity projec
 ## Location
 
 The submodule is located under:
-`Tools/ClassFormatter`
+`Tools/UnityClassFormatter`
 
 This keeps it clearly separated from `Assets/` and from any game-specific code.
 
@@ -40,17 +40,17 @@ or clone directly with:
 To pull the latest changes from the remote formatter repository:
 
 ```
-cd Tools/ClassFormatter
+cd Tools/UnityClassFormatter
 git pull origin main # or the relevant branch
 cd ../..
-git commit -am "Update ClassFormatter submodule"
+git commit -am "Update UnityClassFormatter submodule"
 ```
 
 ## Usage
 
 VSCode or other tools can reference the executable directly from:
 
-`Tools/ClassFormatter/bin/Publish/ClassFormatter.exe`
+`Tools/UnityClassFormatter/bin/Publish/UnityClassFormatter.exe`
 
 No files from the submodule are included in the Unity build.
 
@@ -121,7 +121,7 @@ The formatter runs automatically from VSCode via a configured command:
 ```json
 "commands": [
     {
-        "cmd": "Formatter\\ClassFormatter\\bin\\publish\\ClassFormatter.exe \"${file}\"",
+        "cmd": "Formatter\\UnityClassFormatter\\bin\\publish\\UnityClassFormatter.exe \"${file}\"",
         "match": "\\.cs$"
     }
 ]
@@ -136,7 +136,7 @@ When executed, it reformats the current `.cs` file automatically.
 The source code is in:
 
 ```
-Formatter/ClassFormatter/ClassFormatter.cs
+Formatter/UnityClassFormatter/UnityClassFormatter.cs
 ```
 
 ### Recompile after changes
@@ -144,23 +144,23 @@ Formatter/ClassFormatter/ClassFormatter.cs
 1. Open a terminal in the project folder (where the `.csproj` is)
 2. Run:
    ```bash
-   dotnet publish src/ClassFormatter/ClassFormatter.csproj --configuration Release --output bin/publish
+   dotnet publish src/UnityClassFormatter/UnityClassFormatter.csproj --configuration Release --output bin/publish
    ```
 3. This generates the updated files:
-   - `bin/publish/ClassFormatter.exe`
-   - `bin/publish/ClassFormatter.pdb`
+   - `bin/publish/UnityClassFormatter.exe`
+   - `bin/publish/UnityClassFormatter.pdb`
 
 ### Project Structure
 
 ```
 Formatter/
-└── ClassFormatter/
-    ├── ClassFormatter.cs          ← Source code (edit here)
-    ├── ClassFormatter.csproj      ← Project configuration
+└── UnityClassFormatter/
+    ├── UnityClassFormatter.cs          ← Source code (edit here)
+    ├── UnityClassFormatter.csproj      ← Project configuration
     └── bin/
         └── publish/
-            ├── ClassFormatter.exe ← Executable (generated)
-            └── ClassFormatter.pdb ← Debug symbols
+            ├── UnityClassFormatter.exe ← Executable (generated)
+            └── UnityClassFormatter.pdb ← Debug symbols
 ```
 
 ## Technical Requirements
@@ -223,13 +223,36 @@ public class PlayerController : MonoBehaviour {
 }
 ```
 
+## Unit Tests
+
+This project includes unit tests to verify the correctness of the class reordering functionality. The tests are located in the `tests/UnityClassFormatter.Tests/` directory and use the xUnit testing framework.
+
+### Running the Tests
+
+To run the unit tests, ensure you have the .NET SDK installed and execute the following command from the project root:
+
+```bash
+dotnet test
+```
+
+### What the Tests Cover
+
+The unit tests validate various aspects of the formatter's behavior, including:
+
+- Basic reordering of class members (fields and methods) by access level and alphabetical order.
+- Handling of `[Header]` attributes to preserve Unity Inspector groupings.
+- Reordering within multiple header groups.
+- Sorting of fields with and without headers, ensuring grouped fields remain together.
+- Placeholder tests for main program functionality (e.g., file handling).
+
+These tests ensure that the formatter correctly reorganizes C# classes without altering the logic or content of the code, while respecting Unity-specific attributes.
+
 ---
 
 ## Support
 
-For changes in formatting rules, edit the file `ClassFormatter.cs` and adjust the logic in:
+For changes in formatting rules, edit the file `UnityClassFormatter.cs` and adjust the logic in:
 
 - `VisitClassDeclaration()`: Define the categories
 - `SortMembers()`: Define the sorting order
 - `GetAccessOrder()`: Define the access level priority
-

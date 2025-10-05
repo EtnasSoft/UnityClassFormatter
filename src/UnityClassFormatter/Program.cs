@@ -2,7 +2,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace ClassFormatter
+namespace UnityClassFormatter
 {
     public class Program
     {
@@ -10,7 +10,7 @@ namespace ClassFormatter
         {
             if (args.Length != 1)
             {
-                Console.WriteLine("Usage: ClassFormatter <file.cs>");
+                Console.WriteLine("Usage: UnityClassFormatter <file.cs>");
                 return;
             }
 

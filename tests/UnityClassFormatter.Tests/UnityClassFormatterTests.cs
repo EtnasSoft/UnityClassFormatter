@@ -3,9 +3,9 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Xunit;
 
-namespace ClassFormatter.Tests;
+namespace UnityClassFormatter.Tests;
 
-public class UnitTest1
+public class UnityClassFormatterTests
 {
     [Fact]
     public void TestReorderSimpleClass()

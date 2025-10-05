@@ -1,0 +1,20 @@
+UnityClassFormatter
+├── src
+│   └── UnityClassFormatter
+│       ├── Program.cs
+│       └── UnityClassFormatter.csproj
+├── tests
+│   └── UnityClassFormatter.Tests
+│       ├── UnityClassFormatterTests.cs
+│       └── UnityClassFormatter.Tests.csproj
+├── UnityClassFormatter.sln
+├── .editorconfig
+├── .gitignore
+├── CONTRIBUTING.md
+├── Directory.Build.props
+├── global.json
+├── LICENSE
+├── nuget.config
+├── project.tree
+└── README.md
+
