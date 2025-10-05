@@ -1,13 +1,12 @@
-using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace ClassFormatter
 {
-    class Program
+    public class Program
     {
-        static void Main(string[] args)
+        public static void Main(string[] args)
         {
             if (args.Length != 1)
             {
@@ -15,31 +14,32 @@ namespace ClassFormatter
                 return;
             }
 
-            string filePath = args[0];
+            var filePath = args[0];
             if (!File.Exists(filePath))
             {
                 Console.WriteLine("File not found.");
                 return;
             }
 
-            string code = File.ReadAllText(filePath);
-            SyntaxTree tree = CSharpSyntaxTree.ParseText(code);
+            var code = File.ReadAllText(filePath);
+            var tree = CSharpSyntaxTree.ParseText(code);
             var rewriter = new ClassReorderRewriter();
-            SyntaxNode newRoot = rewriter.Visit(tree.GetRoot());
-            string newCode = newRoot.ToFullString();
+            var newRoot = rewriter.Visit(tree.GetRoot());
+            var newCode = newRoot.ToFullString();
             File.WriteAllText(filePath, newCode);
             Console.WriteLine("File reformatted.");
         }
     }
 
-    class ClassReorderRewriter : CSharpSyntaxRewriter
+    public class ClassReorderRewriter : CSharpSyntaxRewriter
     {
 
         public override SyntaxNode VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var constantFields = new List<MemberInfo>();
             var staticFields = new List<MemberInfo>();
-            var fields = new List<MemberInfo>();
+            var serializedFields = new List<MemberInfo>();
+            var nonSerializedFields = new List<MemberInfo>();
             var constructors = new List<MemberInfo>();
             var properties = new List<MemberInfo>();
             var eventsDelegates = new List<MemberInfo>();
@@ -48,29 +48,28 @@ namespace ClassFormatter
             var privateMethods = new List<MemberInfo>();
             var nestedTypes = new List<MemberInfo>();
 
-            int currentGroupOrder = 0;
-            int lastHeaderGroupOrder = -1;
+            var currentGroupOrder = 0;
+            var lastHeaderGroupOrder = -1;
 
             foreach (var member in node.Members)
             {
                 var acc = GetAccessibility(member.Modifiers);
-                int accessOrder = GetAccessOrder(acc);
-                string name = GetName(member);
+                var accessOrder = GetAccessOrder(acc);
+                var name = GetName(member);
 
-                // Detectar si el miembro tiene un atributo [Header]
-                string headerValue = GetHeaderAttribute(member);
-                bool hasHeader = !string.IsNullOrEmpty(headerValue);
+                // Detect if the member has a [Header] attribute
+                var headerValue = GetHeaderAttribute(member);
+                var hasHeader = !string.IsNullOrEmpty(headerValue);
 
-                // Si encontramos un nuevo [Header], incrementamos el grupo
+                // If we find a new [Header], increment the group
                 if (hasHeader)
                 {
                     currentGroupOrder++;
                     lastHeaderGroupOrder = currentGroupOrder;
                 }
 
-                // Los miembros sin [Header] que vienen después de un grupo con [Header]
-                // pertenecen a ese grupo hasta encontrar otro [Header] o cambiar de tipo
-                int memberGroupOrder = (lastHeaderGroupOrder >= 0) ? lastHeaderGroupOrder : currentGroupOrder;
+                // Members without [Header] that come after a group with [Header] belong to that group until another [Header] is found or the type changes
+                var memberGroupOrder = (lastHeaderGroupOrder >= 0) ? lastHeaderGroupOrder : currentGroupOrder;
 
                 switch (member)
                 {
@@ -80,14 +79,18 @@ namespace ClassFormatter
                         else if (fd.Modifiers.Any(m => m.IsKind(SyntaxKind.StaticKeyword)))
                             staticFields.Add(new MemberInfo(fd, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
                         else
-                            fields.Add(new MemberInfo(fd, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
+                        {
+                            if (fd.AttributeLists.Any(al => al.Attributes.Any(a => a.Name.ToString() == "SerializeField")))
+                                serializedFields.Add(new MemberInfo(fd, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
+                            else
+                                nonSerializedFields.Add(new MemberInfo(fd, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
+                        }
                         break;
                     case PropertyDeclarationSyntax p:
                         properties.Add(new MemberInfo(p, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
                         break;
                     case ConstructorDeclarationSyntax c:
                         constructors.Add(new MemberInfo(c, accessOrder, name, false, "", 0));
-                        lastHeaderGroupOrder = -1; // Reset header group después de constructores
                         break;
                     case MethodDeclarationSyntax m:
                         var methodName = m.Identifier.Text;
@@ -100,14 +103,12 @@ namespace ClassFormatter
                             else
                                 privateMethods.Add(new MemberInfo(m, accessOrder, methodName, false, "", 0));
                         }
-                        lastHeaderGroupOrder = -1; // Reset header group después de métodos
                         break;
                     case EventDeclarationSyntax e:
                         eventsDelegates.Add(new MemberInfo(e, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
                         break;
                     case DelegateDeclarationSyntax d:
                         eventsDelegates.Add(new MemberInfo(d, accessOrder, name, false, "", 0));
-                        lastHeaderGroupOrder = -1;
                         break;
                     case EventFieldDeclarationSyntax efd:
                         eventsDelegates.Add(new MemberInfo(efd, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
@@ -117,18 +118,23 @@ namespace ClassFormatter
                     case InterfaceDeclarationSyntax id:
                     case EnumDeclarationSyntax ed:
                         nestedTypes.Add(new MemberInfo(member, accessOrder, name, false, "", 0));
-                        lastHeaderGroupOrder = -1;
                         break;
                     default:
-                        fields.Add(new MemberInfo(member, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
+                        nonSerializedFields.Add(new MemberInfo(member, accessOrder, name, hasHeader, headerValue, memberGroupOrder));
                         break;
                 }
             }
 
-            // Ordenar cada lista: AccessOrder -> GroupOrder -> los que tienen [Header] primero -> Name
+            // Sort each list: AccessOrder -> GroupOrder -> Name
             constantFields = SortMembers(constantFields);
             staticFields = SortMembers(staticFields);
-            fields = SortMembers(fields);
+            // Process serialized fields with header grouping
+            serializedFields = ProcessSerializedFields(serializedFields);
+            // Non-serialized fields sorted alphabetically
+            nonSerializedFields = nonSerializedFields.OrderBy(x => x.AccessOrder).ThenBy(x => x.Name).ToList();
+            var fields = serializedFields.Concat(nonSerializedFields).ToList();
+            // Move [Header] attributes to the first member in each group
+            fields = MoveHeadersToFirst(fields);
             constructors = constructors.OrderBy(x => x.AccessOrder).ThenBy(x => x.Name).ToList();
             properties = SortMembers(properties);
             eventsDelegates = SortMembers(eventsDelegates);
@@ -147,7 +153,7 @@ namespace ClassFormatter
             return node.WithMembers(newMembers);
         }
 
-        private Accessibility GetAccessibility(SyntaxTokenList modifiers)
+        private static Accessibility GetAccessibility(SyntaxTokenList modifiers)
         {
             if (modifiers.Any(m => m.IsKind(SyntaxKind.PublicKeyword)))
                 return Accessibility.Public;
@@ -162,21 +168,21 @@ namespace ClassFormatter
             return Accessibility.Private;
         }
 
-        private int GetAccessOrder(Accessibility acc)
+        private static int GetAccessOrder(Accessibility acc)
         {
-            switch (acc)
+            return acc switch
             {
-                case Accessibility.Public: return 0;
-                case Accessibility.Internal: return 1;
-                case Accessibility.Protected: return 2;
-                case Accessibility.Private: return 3;
-                case Accessibility.ProtectedAndInternal: return 1;
-                default: return 3;
-            }
+                Accessibility.Public => 0,
+                Accessibility.Internal => 1,
+                Accessibility.Protected => 2,
+                Accessibility.Private => 3,
+                Accessibility.ProtectedAndInternal => 1,
+                _ => 3,
+            };
         }
 
-        // Extrae el valor del atributo [Header("...")]
-        private string GetHeaderAttribute(MemberDeclarationSyntax member)
+        // Extract the value of the [Header("...")] attribute
+        private static string GetHeaderAttribute(MemberDeclarationSyntax member)
         {
             var attributeLists = member.AttributeLists;
             foreach (var attrList in attributeLists)
@@ -201,65 +207,136 @@ namespace ClassFormatter
             return "";
         }
 
-        private string GetName(MemberDeclarationSyntax member)
+        private static string GetName(MemberDeclarationSyntax member)
         {
-            switch (member)
+            return member switch
             {
-                case FieldDeclarationSyntax fd:
-                    return fd.Declaration.Variables.FirstOrDefault()?.Identifier.Text ?? "";
-                case PropertyDeclarationSyntax p:
-                    return p.Identifier.Text;
-                case ConstructorDeclarationSyntax c:
-                    return c.Identifier.Text;
-                case MethodDeclarationSyntax m:
-                    return m.Identifier.Text;
-                case EventDeclarationSyntax e:
-                    return e.Identifier.Text;
-                case DelegateDeclarationSyntax d:
-                    return d.Identifier.Text;
-                case EventFieldDeclarationSyntax efd:
-                    return efd.Declaration.Variables.FirstOrDefault()?.Identifier.Text ?? "";
-                case ClassDeclarationSyntax cd:
-                    return cd.Identifier.Text;
-                case StructDeclarationSyntax sd:
-                    return sd.Identifier.Text;
-                case InterfaceDeclarationSyntax id:
-                    return id.Identifier.Text;
-                case EnumDeclarationSyntax ed:
-                    return ed.Identifier.Text;
-                default:
-                    return "";
-            }
+                FieldDeclarationSyntax fd => fd.Declaration.Variables.FirstOrDefault()?.Identifier.Text ?? "",
+                PropertyDeclarationSyntax p => p.Identifier.Text,
+                ConstructorDeclarationSyntax c => c.Identifier.Text,
+                MethodDeclarationSyntax m => m.Identifier.Text,
+                EventDeclarationSyntax e => e.Identifier.Text,
+                DelegateDeclarationSyntax d => d.Identifier.Text,
+                EventFieldDeclarationSyntax efd => efd.Declaration.Variables.FirstOrDefault()?.Identifier.Text ?? "",
+                ClassDeclarationSyntax cd => cd.Identifier.Text,
+                StructDeclarationSyntax sd => sd.Identifier.Text,
+                InterfaceDeclarationSyntax id => id.Identifier.Text,
+                EnumDeclarationSyntax ed => ed.Identifier.Text,
+                _ => "",
+            };
         }
 
-        // Función de ordenamiento especial que mantiene grupos con [Header]
-        private List<MemberInfo> SortMembers(List<MemberInfo> members)
+        // Special sorting function that maintains groups with [Header]
+        private static List<MemberInfo> SortMembers(List<MemberInfo> members)
         {
-            return members
-              .OrderBy(x => x.AccessOrder)           // 1. Por nivel de acceso
-              .ThenBy(x => x.GroupOrder)              // 2. Por grupo de [Header]
-              .ThenBy(x => x.HasHeader ? 0 : 1)       // 3. Los que tienen [Header] van primero en su grupo
-              .ThenBy(x => x.Name)                    // 4. Alfabéticamente por nombre
-              .ToList();
+            return [.. members
+              .OrderBy(x => x.AccessOrder)           // 1. By access level
+              .ThenBy(x => x.GroupOrder)              // 2. By [Header] group
+              .ThenBy(x => x.Name)];                   // 3. Alphabetically by name
         }
-        private class MemberInfo
+        private static List<MemberInfo> ProcessSerializedFields(List<MemberInfo> fields)
         {
-            public MemberDeclarationSyntax Node { get; set; }
-            public int AccessOrder { get; set; }
-            public string Name { get; set; }
-            public bool HasHeader { get; set; }  // Indica si este miembro tiene [Header]
-            public string HeaderValue { get; set; }  // Valor del [Header] si lo tiene
-            public int GroupOrder { get; set; }  // Orden del grupo de header
-
-            public MemberInfo(MemberDeclarationSyntax node, int accessOrder, string name, bool hasHeader, string headerValue, int groupOrder)
+            int currentGroup = 0;
+            foreach (var mi in fields)
             {
-                Node = node;
-                AccessOrder = accessOrder;
-                Name = name;
-                HasHeader = hasHeader;
-                HeaderValue = headerValue;
-                GroupOrder = groupOrder;
+                if (mi.HasHeader)
+                {
+                    currentGroup++;
+                    mi.GroupOrder = currentGroup;
+                }
+                else
+                {
+                    mi.GroupOrder = currentGroup;
+                }
             }
+            return SortMembers(fields);
+        }
+
+        private static List<MemberInfo> MoveHeadersToFirst(List<MemberInfo> members)
+        {
+            var grouped = members.GroupBy(x => x.GroupOrder).OrderBy(g => g.Key);
+            var result = new List<MemberInfo>();
+            foreach (var group in grouped)
+            {
+                var groupMembers = group.ToList();
+                var withHeader = groupMembers.FirstOrDefault(m => m.HasHeader);
+                if (withHeader != null)
+                {
+                    var headerValue = GetHeaderAttribute(withHeader.Node);
+                    if (!string.IsNullOrEmpty(headerValue))
+                    {
+                        var first = groupMembers[0];
+                        if (first != withHeader)
+                        {
+                            var newFirstNode = AddHeaderAttribute(first.Node, headerValue);
+                            var newWithHeaderNode = RemoveHeaderAttribute(withHeader.Node);
+                            first.Node = newFirstNode;
+                            withHeader.Node = newWithHeaderNode;
+                            // Update HasHeader
+                            first.HasHeader = true;
+                            first.HeaderValue = headerValue;
+                            withHeader.HasHeader = false;
+                            withHeader.HeaderValue = "";
+                        }
+                    }
+                }
+                result.AddRange(groupMembers);
+            }
+            return result;
+        }
+
+        private static List<MemberInfo> AddExtraNewlinesAfterHeaders(List<MemberInfo> members)
+        {
+            for (int i = 0; i < members.Count; i++)
+            {
+                if (members[i].HasHeader)
+                {
+                    var node = members[i].Node;
+                    var trailingTrivia = node.GetTrailingTrivia();
+                    var extraNewline = SyntaxFactory.CarriageReturnLineFeed;
+                    var newTrailingTrivia = trailingTrivia.Add(extraNewline);
+                    members[i].Node = node.WithTrailingTrivia(newTrailingTrivia);
+                }
+            }
+            return members;
+        }
+
+        private static MemberDeclarationSyntax AddHeaderAttribute(MemberDeclarationSyntax member, string headerValue)
+        {
+            var attribute = SyntaxFactory.Attribute(
+                SyntaxFactory.IdentifierName("Header"),
+                SyntaxFactory.AttributeArgumentList(
+                    SyntaxFactory.SingletonSeparatedList(
+                        SyntaxFactory.AttributeArgument(
+                            SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, SyntaxFactory.Literal(headerValue))
+                        )
+                    )
+                )
+            );
+            var attributeList = SyntaxFactory.AttributeList(SyntaxFactory.SingletonSeparatedList(attribute))
+                .WithLeadingTrivia(SyntaxFactory.TriviaList(SyntaxFactory.CarriageReturnLineFeed, SyntaxFactory.Whitespace("    ")))
+                .WithTrailingTrivia(SyntaxFactory.CarriageReturnLineFeed);
+            var newAttributeLists = new[] { attributeList }.Concat(member.AttributeLists).ToList();
+            return member.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
+        }
+
+        private static MemberDeclarationSyntax RemoveHeaderAttribute(MemberDeclarationSyntax member)
+        {
+            var newAttributeLists = member.AttributeLists
+                .Select(al => al.WithAttributes(SyntaxFactory.SeparatedList(al.Attributes.Where(a => a.Name.ToString() != "Header" && a.Name.ToString() != "HeaderAttribute"))))
+                .Where(al => al.Attributes.Any())
+                .ToList();
+            return member.WithAttributeLists(SyntaxFactory.List(newAttributeLists));
+        }
+
+        private class MemberInfo(MemberDeclarationSyntax node, int accessOrder, string name, bool hasHeader, string headerValue, int groupOrder)
+        {
+            public MemberDeclarationSyntax Node { get; set; } = node;
+            public int AccessOrder { get; set; } = accessOrder;
+            public string Name { get; set; } = name;
+            public bool HasHeader { get; set; } = hasHeader;
+            public string HeaderValue { get; set; } = headerValue;
+            public int GroupOrder { get; set; } = groupOrder;
         }
     }
 }
