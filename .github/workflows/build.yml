@@ -19,13 +19,13 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
-        run: dotnet restore src/UnityClassFormatter/UnityClassFormatter.csproj
+        run: dotnet restore UnityClassFormatter.sln
 
       - name: Build
-        run: dotnet build src/UnityClassFormatter/UnityClassFormatter.csproj --configuration Release --no-restore
+        run: dotnet build UnityClassFormatter.sln --configuration Release --no-restore
 
       - name: Run tests
-        run: dotnet test tests/UnityClassFormatter.Tests/UnityClassFormatter.Tests.csproj --configuration Release --no-build
+        run: dotnet test UnityClassFormatter.sln --configuration Release --no-build
 
       - name: Publish
         run: dotnet publish src/UnityClassFormatter/UnityClassFormatter.csproj --configuration Release --output ./publish --no-build
